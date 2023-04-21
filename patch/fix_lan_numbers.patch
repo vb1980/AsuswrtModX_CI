@@ -1,0 +1,43 @@
+diff --git a/release/src/router/httpd/web.c b/release/src/router/httpd/web.c
+index b03aca42f..3fe0ce77c 100644
+--- a/release/src/router/httpd/web.c
++++ b/release/src/router/httpd/web.c
+@@ -35038,6 +35038,18 @@ ej_get_wan_lan_status(int eid, webs_t wp, int argc, char **argv)
+ 		if (lan_count == 3)
+ 			continue;
+ #endif
++
++#if defined(RTAX18T) || defined(RTHAR) || defined(RTCR660X) || defined(RTTX1801) || defined(RTCMCCA9)
++		// Special case : bypass L4 (powerline)
++		if (lan_count == 4)
++			continue;
++#endif
++		
++#if defined(RTQ20)
++		// Special case : bypass L3&L4 (powerline)
++		if (lan_count == 3 || lan_count == 4)
++			continue;
++#endif
+ 		json_object_object_add(wanLanLinkSpeed, name, json_object_new_string(speed));
+ 	}
+ #if defined(PLAX56_XP4)
+@@ -35045,6 +35057,19 @@ ej_get_wan_lan_status(int eid, webs_t wp, int argc, char **argv)
+ 		if (lan_count >= 3)
+ 			lan_count--;
+ #endif
++
++#if defined(RTAX18T) || defined(RTHAR) || defined(RTCR660X) || defined(RTTX1801) || defined(RTCMCCA9)
++		// Special case : bypass L4 (powerline)
++		if (lan_count >= 4)
++			lan_count--;
++#endif
++	
++#if defined(RTQ20)
++		// Special case : bypass L3&L4 (powerline)
++		if (lan_count >= 3)
++			lan_count=2;
++#endif
++
+ 	json_object_object_add(wanLanCount, "wanCount", json_object_new_int(wan_count));
+ 	json_object_object_add(wanLanCount, "lanCount", json_object_new_int(lan_count));
+ 	json_object_object_add(wanLanStatus, "portSpeed", wanLanLinkSpeed);

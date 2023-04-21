@@ -3,22 +3,36 @@ name: Build Asuswrt-Modx Next
 on:
   workflow_dispatch:
     inputs:
+      branch:
+        type: choice
+        description: 'branch to build'
+        options:
+        - main
+        - 5.2.2
+        default:
+          5.2.2
       target:
         type: choice
         description: 'target to build'
         options:
-        - RT-CMCCA9
-        - RT-MSG1500
-        - RT-A040WQ
         - RT-AX18T
+        - RT-CMCCA9
+        - RT-CR660X
+        - RT-HAR
+        - RT-Q20
+        - RT-TX1801
         default:
           RT-AX18T
+      applypatch:
+        type: boolean
+        description: 'whether apply patch to display lan numbers'
+        default: 'true'
       uploadwet:
         type: boolean
         description: 'whether to upload firmware to wettransfer'
         default: 'true'
 env:
-  REPOSITORY_URL: https://github.com/Bonnie2980/asuswrt-modx-next.git
+  REPOSITORY_URL: https://github.com/vb1980/asuswrt-modx-next.git
   TOOLCHAINS_URL: https://github.com/SWRT-dev/mtk-toolchains.git
   WORK_PATH: /home/runner/work
   SRC_PATH: /home/runner/work/asuswrt-modx-next
@@ -52,8 +66,15 @@ jobs:
         sudo timedatectl set-timezone "$TIME_ZONE"
     - name: Clone source code
       run: |
-        git clone --depth=1 $REPOSITORY_URL $SRC_PATH
+        git clone -b ${{ github.event.inputs.branch }} --depth=1 $REPOSITORY_URL $SRC_PATH
         git clone --depth=1 $TOOLCHAINS_URL $TOOLCHAINS_PATH
+    - name: Apply patch
+      if: github.event.inputs.applypatch == 'true'
+      run: |
+        sudo cp -f patch/fix_lan_numbers.patch $SRC_PATH/fix_lan_numbers.patch
+        cd $SRC_PATH
+        sudo chmod 777 ./fix_lan_numbers.patch
+        git apply -p1 < fix_lan_numbers.patch
     - name: Build
       run: |
         sudo cp -f scripts/build_next.sh $WORK_PATH/build.sh
