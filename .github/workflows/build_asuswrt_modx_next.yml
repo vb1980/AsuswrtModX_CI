@@ -27,10 +27,6 @@ on:
         type: boolean
         description: 'whether apply patch to display lan numbers'
         default: 'true'
-      uploadwet:
-        type: boolean
-        description: 'whether to upload firmware to wettransfer'
-        default: 'true'
 env:
   REPOSITORY_URL: https://github.com/vb1980/asuswrt-modx-next.git
   TOOLCHAINS_URL: https://github.com/SWRT-dev/mtk-toolchains.git
@@ -97,13 +93,6 @@ jobs:
       with:
         name: Asuswrt-Next-packages
         path: ${{ env.FIRMWARE }}
-    - name: Upload firmware to WeTransfer
-      if: env.STATUS == 'success' && github.event.inputs.uploadwet == 'true'
-      run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
-        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
-        echo "WETRANSFER_URL=$(cat wetransfer.log | grep -o -E "https?://[a-zA-Z0-9\.\/_&=@$%?~#-]*")" >> $GITHUB_ENV
     - name: Remove obsolete firmwares on artifacts
       uses: c-hive/gha-remove-artifacts@v1.3.0
       if: env.STATUS == 'success'
