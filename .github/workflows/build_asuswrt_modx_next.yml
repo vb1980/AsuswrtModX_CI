@@ -21,6 +21,7 @@ on:
         - RT-HAR
         - RT-Q20
         - RT-TX1801
+        - RT-XG1
         default:
           RT-AX18T
       applypatch:
