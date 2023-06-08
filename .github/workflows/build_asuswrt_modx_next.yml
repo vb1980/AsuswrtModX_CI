@@ -29,7 +29,7 @@ on:
         description: 'whether apply patch to display lan numbers'
         default: 'true'
 env:
-  REPOSITORY_URL: https://github.com/vb1980/asuswrt-modx-next.git
+  REPOSITORY_URL: https://github.com/stkuroneko/asuswrt-modx-next.git
   TOOLCHAINS_URL: https://github.com/SWRT-dev/mtk-toolchains.git
   WORK_PATH: /home/runner/work
   SRC_PATH: /home/runner/work/asuswrt-modx-next
