@@ -7,7 +7,7 @@ on:
         type: choice
         description: 'branch to build'
         options:
-        - main
+        #- main
         - 5.2.2
         default:
           5.2.2
@@ -27,8 +27,12 @@ on:
           RT-AX18T
       applypatch:
         type: boolean
-        description: 'whether apply patch to display lan numbers'
+        description: 'apply patch to display lan numbers'
         default: 'true'
+      uploadanon:
+        type: boolean
+        description: 'upload firmware to anonfiles'
+        default: 'false'
 env:
   REPOSITORY_URL: https://github.com/stkuroneko/asuswrt-modx-next.git
   TOOLCHAINS_URL: https://github.com/SWRT-dev/mtk-toolchains.git
@@ -43,8 +47,7 @@ jobs:
     if: github.event.repository.owner.id == github.event.sender.id
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@main
+    - uses: actions/checkout@v3
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -93,6 +96,12 @@ jobs:
       with:
         name: Asuswrt-Next-packages
         path: ${{ env.FIRMWARE }}
+    - name: Upload firmware to anonfiles
+      if: env.STATUS == 'success' && github.event.inputs.uploadanon == 'true'
+      run: |
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer anon --no-progress ${FIRMWARE} 2>&1 | tee anonfile.log
+        echo "::warning file=anonfile.com::$(cat anonfile.log | grep -o -E "https?://[a-zA-Z0-9\.\/_&=@$%?~#-]*")"
     - name: Remove obsolete firmwares on artifacts
       uses: c-hive/gha-remove-artifacts@v1.3.0
       if: env.STATUS == 'success'

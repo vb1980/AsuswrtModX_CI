@@ -27,26 +27,25 @@ env:
   FIRMWARE_PATH: /home/runner/work/firmwares
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     if: github.event.repository.owner.id == github.event.sender.id
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
         sudo dpkg --add-architecture i386
-        sudo apt-get update
-        sudo apt-get upgrade
-        sudo apt-get -y install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev \
-        patch python3.5 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core \
-        gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev \
-        autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget libncurses5:i386 \
-        libelf1:i386 lib32z1 lib32stdc++6 gtk-doc-tools intltool binutils-dev cmake lzma liblzma-dev lzma-dev \
-        uuid-dev liblzo2-dev xsltproc dos2unix libstdc++5 docbook-xsl-* sharutils autogen shtool gengetopt \
-        libltdl-dev libtool-bin bison
+        sudo dpkg -l | awk '/ii  lib.*deb.sury.org/ {gsub(/:.*/, s, $2); print $2}' | xargs apt show -a | awk '/Package:/ {p=$2} /APT-Sources: .*focal\/main/ {print p"/focal"}' | sudo xargs eatmydata apt install --allow-downgrades
+        sudo apt update
+        sudo apt-get -y --no-install-recommends install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev
+        sudo apt-get -y --no-install-recommends install patch python3.5 python2.7 unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs git-core
+        sudo apt-get -y --no-install-recommends install gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev
+        sudo apt-get -y --no-install-recommends install autoconf automake libtool autopoint device-tree-compiler g++-multilib antlr3 gperf wget libncurses5:i386
+        sudo apt-get -y --no-install-recommends install libelf1:i386 lib32z1 lib32stdc++6 gtk-doc-tools intltool binutils-dev cmake lzma liblzma-dev lzma-dev
+        sudo apt-get -y --no-install-recommends install uuid-dev liblzo2-dev xsltproc dos2unix libstdc++5 docbook-xsl-* sharutils autogen shtool gengetopt
+        sudo apt-get -y --no-install-recommends install libltdl-dev libtool-bin bison
         sudo timedatectl set-timezone "$TIME_ZONE"
     - name: Clone source code
       run: |
